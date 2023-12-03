@@ -1,0 +1,34 @@
+{
+	"name": "commage",
+	"type": "module",
+	"version": "0.0.1",
+	"description": "",
+	"author": "Jose Albizures <jose@albizures.com> (https://albizures.com/)",
+	"license": "ISC",
+	"keywords": [],
+	"main": "index.js",
+	"scripts": {
+		"start": "jiti ./src/index.ts",
+		"test:lint": "eslint ."
+	},
+	"dependencies": {
+		"@clack/core": "^0.3.3",
+		"@clack/prompts": "^0.7.0",
+		"@vyke/dency": "^0.0.8",
+		"@vyke/sola": "^0.0.5",
+		"execa": "^8.0.1",
+		"handlebars": "^4.7.8",
+		"only-fns": "^2.0.1",
+		"picocolors": "^1.0.0",
+		"ts-results": "^3.3.0",
+		"tslib": "^2.6.2",
+		"ttab": "^0.8.0",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"@antfu/eslint-config": "^2.1.2",
+		"@types/node": "^20.10.0",
+		"eslint": "^8.55.0",
+		"jiti": "^1.21.0"
+	}
+}
