@@ -6,14 +6,14 @@ import { to } from 'only-fns/promises/await-to'
 import { Config } from './config'
 import { StorageManager } from './storage'
 import { type Command, extraParameters } from './command'
-import { getArgs } from './args'
+import type { Action } from './args'
 import { rootSola } from './sola'
 import { CommandCenter } from './commandCenter'
 
 const sola = rootSola.withTag('app')
 
 export type App = {
-	start: () => void
+	start: (action: Action) => void
 }
 
 export const App = dency.create<App>('app')
@@ -26,15 +26,7 @@ export class CommageApp implements App {
 		private commandCenter: CommandCenter,
 	) { }
 
-	async start() {
-		const args = getArgs()
-
-		if (args.err) {
-			return sola.error(args.val.message)
-		}
-
-		const { action } = args.val
-
+	async start(action: Action) {
 		if (action === 'run') {
 			this.runCommand()
 		}
@@ -44,7 +36,7 @@ export class CommageApp implements App {
 		}
 
 		if (action === 'edit') {
-			return sola.log('action run')
+			return sola.log('action edit')
 		}
 	}
 
@@ -110,8 +102,6 @@ export class CommageApp implements App {
 	}
 
 	async addCommand() {
-		sola.log('action run')
-
 		p.intro(`${color.bgCyan(color.black(' adding a new command '))}`)
 
 		const newCommand = await p.group<Command>({

@@ -23,11 +23,13 @@
 		"ts-results": "^3.3.0",
 		"tslib": "^2.6.2",
 		"ttab": "^0.8.0",
+		"yargs": "^17.7.2",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
 		"@antfu/eslint-config": "^2.1.2",
 		"@types/node": "^20.10.0",
+		"@types/yargs": "^17.0.32",
 		"eslint": "^8.55.0",
 		"jiti": "^1.21.0"
 	}
