@@ -13,7 +13,8 @@
 	"scripts": {
 		"start": "jiti ./src/index.ts",
 		"build": "unbuild",
-		"test:lint": "eslint ."
+		"test:lint": "eslint .",
+		"release": "standard-version -t v && pnpm publish --access public"
 	},
 	"dependencies": {
 		"@clack/core": "^0.3.3",
@@ -36,6 +37,7 @@
 		"@types/yargs": "^17.0.32",
 		"eslint": "^8.55.0",
 		"jiti": "^1.21.0",
+		"standard-version": "^9.5.0",
 		"unbuild": "^2.0.0"
 	}
 }
