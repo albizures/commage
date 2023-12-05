@@ -6,9 +6,13 @@
 	"author": "Jose Albizures <jose@albizures.com> (https://albizures.com/)",
 	"license": "ISC",
 	"keywords": [],
-	"main": "index.js",
+	"main": "dist/index.mjs",
+	"bin": {
+		"commage": "bin/commage.mjs"
+	},
 	"scripts": {
 		"start": "jiti ./src/index.ts",
+		"build": "unbuild",
 		"test:lint": "eslint ."
 	},
 	"dependencies": {
@@ -31,6 +35,7 @@
 		"@types/node": "^20.10.0",
 		"@types/yargs": "^17.0.32",
 		"eslint": "^8.55.0",
-		"jiti": "^1.21.0"
+		"jiti": "^1.21.0",
+		"unbuild": "^2.0.0"
 	}
 }
