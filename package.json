@@ -20,6 +20,7 @@
 		"build": "unbuild",
 		"test:lint": "eslint .",
 		"test:types": "tsc --noEmit",
+		"prepack": "pnpm build",
 		"release": "standard-version -t v && pnpm publish --access public"
 	},
 	"dependencies": {
