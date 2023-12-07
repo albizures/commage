@@ -1,5 +1,5 @@
 import Handlebars from 'handlebars'
-import { Err, Ok, type Result } from 'ts-results'
+import { type Result, r } from '@vyke/results'
 import { z } from 'zod'
 
 export const parameterSchema = z.object({
@@ -36,9 +36,9 @@ export function extraParameters(command: string): Result<Array<Parameter>, Error
 			allowProtoPropertiesByDefault: true,
 		})
 
-		return Ok(parameters)
+		return r.ok(parameters)
 	}
 	catch (error) {
-		return Err(new Error(String(error)))
+		return r.err(new Error(String(error)))
 	}
 }

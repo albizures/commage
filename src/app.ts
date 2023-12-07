@@ -1,14 +1,13 @@
 import * as p from '@clack/prompts'
 import color from 'picocolors'
 import { dency } from '@vyke/dency'
-import { Err, Ok, type Result } from 'ts-results'
-import { to } from 'only-fns/promises/await-to'
+import { type Result, r } from '@vyke/results'
 import { Config } from './config'
 import { StorageManager } from './storage'
-import { type Command, extraParameters } from './command'
+import { type Command, type Parameter, extraParameters } from './command'
 import type { Action } from './args'
 import { rootSola } from './sola'
-import { CommandCenter } from './commandCenter'
+import { CommandCenter } from './command-center'
 
 const sola = rootSola.withTag('app')
 
@@ -46,10 +45,10 @@ export class CommageApp implements App {
 		const result = await this.commandCenter.getAll()
 
 		if (!result.ok) {
-			return sola.error(result.val)
+			return sola.error(result.value)
 		}
 
-		const commands = result.val
+		const commands = result.value
 
 		const options = Object.values(commands).map((command) => {
 			return {
@@ -63,42 +62,39 @@ export class CommageApp implements App {
 
 		const commandName = await p.select<Array<{ value: string }>, string>({
 			message: 'Choose the command to run',
-			options: Object.values(commands).map((command) => {
-				return {
-					value: command.name,
-				}
-			}),
+			options,
 		})
 
 		const command = commands[commandName as string]!
 
-		const parameters = (await this.askForParameters(command)).unwrap()
+		const parameters = r.unwrap(await this.askForParameters(command))
 
 		this.commandCenter.run(command, parameters)
 	}
 
 	async askForParameters(command: Command): Promise<Result<Record<string, unknown>, Error>> {
-		const parameterEntries = await to(Promise.all(
-			command.parameters.map(async (parameter) => {
-				const { name, defaultValue } = parameter
+		const parameterEntries: Array<Array<string>> = []
+		for (const parameter of command.parameters) {
+			const { name, defaultValue } = parameter
 
-				return [
-					name,
-					String(await p.text({
-						message: `Value for ${name}`,
-						placeholder: defaultValue ? `Enter to use ${defaultValue}` : 'Enter the value',
-						defaultValue,
-					})),
-				]
-			}),
-		))
+			const result = await r.to(p.text({
+				message: `Value for ${name}`,
+				placeholder: defaultValue ? `Enter to use ${defaultValue}` : 'Enter the value',
+				defaultValue,
+			}))
 
-		if (!parameterEntries.ok) {
-			sola.error(parameterEntries.error)
-			return Err(new Error('getting the parameters'))
+			if (!result.ok) {
+				p.log.error(`Unable to get default value for ${name}`)
+				return r.err(new Error(`Error while getting default value ${name}`))
+			}
+
+			parameterEntries.push([
+				name,
+				String(result.value),
+			])
 		}
 
-		return Ok(Object.fromEntries(parameterEntries.data) as Record<string, unknown>)
+		return r.ok(Object.fromEntries(parameterEntries) as Record<string, unknown>)
 	}
 
 	async addCommand() {
@@ -127,34 +123,35 @@ export class CommageApp implements App {
 					},
 				}) as Promise<string>
 			},
-			parameters(context) {
+			async parameters(context) {
 				const { results } = context
 
 				if (results.template) {
-					const parameters = extraParameters(results.template).expect('Unabled to extra parameters from command')
+					const parameters = r.expect(extraParameters(results.template), 'Unabled to extra parameters from command')
+					const parametersWithDefaultValue: Array<Parameter> = []
+					for (const parameter of parameters) {
+						const result = await p.text({
+							message: `Add a default value for "${parameter.name}"`,
+							placeholder: 'Enter to skip',
+						})
 
-					return Promise.all(
-						parameters.map(async (parameter) => {
-							const result = await p.text({
-								message: `Add a default value for "${parameter.name}"`,
-								placeholder: 'Enter to skip',
-							})
+						const defaultValue = String(result ?? '').trim()
 
-							const defaultValue = String(result ?? '').trim()
-
-							if (defaultValue === '') {
-								return parameter
-							}
-
-							return {
+						if (defaultValue === '') {
+							parametersWithDefaultValue.push(parameter)
+						}
+						else {
+							parametersWithDefaultValue.push({
 								...parameter,
 								defaultValue,
-							}
-						}),
-					)
+							})
+						}
+					}
+
+					return parametersWithDefaultValue
 				}
 
-				return Promise.resolve([])
+				return []
 			},
 		})
 
@@ -169,6 +166,6 @@ export class CommageApp implements App {
 		}
 
 		p.log.error('Error while creating command')
-		sola.error(result.val)
+		sola.error(result.value)
 	}
 }

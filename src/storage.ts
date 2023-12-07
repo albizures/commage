@@ -1,8 +1,7 @@
 import * as fs from 'node:fs/promises'
 import path from 'node:path'
 import { dency } from '@vyke/dency'
-import { to } from 'only-fns/promises/await-to'
-import { Err, Ok, type Result } from 'ts-results'
+import { type Result, r } from '@vyke/results'
 import { z } from 'zod'
 import { type Command, commandSchema } from './command'
 import { Config } from './config'
@@ -14,7 +13,7 @@ const storageContentSchema = z.object({
 	commands: z.record(z.string(), commandSchema),
 })
 
-type StorageContent = z.infer<typeof storageContentSchema>
+export type StorageContent = z.infer<typeof storageContentSchema>
 
 const defaultContent: StorageContent = {
 	commands: {},
@@ -36,49 +35,49 @@ export class JSONStorageManager implements StorageManager {
 		const { commands: filename } = this.config.files
 		const dirname = path.dirname(filename)
 
-		const stats = await to(fs.stat(dirname))
+		const stats = await r.to(fs.stat(dirname))
 
-		if (!stats.ok || !stats.data.isDirectory()) {
-			const mkdirResult = await to(fs.mkdir(dirname))
+		if (!stats.ok || !stats.value.isDirectory()) {
+			const mkdirResult = await r.to(fs.mkdir(dirname))
 
 			if (!mkdirResult.ok) {
-				sola.error(mkdirResult.error)
-				return Err(new Error(`writing the folder structure ${filename}`))
+				sola.error(mkdirResult.value)
+				return r.err(new Error(`writing the folder structure ${filename}`))
 			}
 		}
 
-		const writeResult = await to(fs.writeFile(filename, JSON.stringify(content)))
+		const writeResult = await r.to(fs.writeFile(filename, JSON.stringify(content)))
 
 		if (!writeResult.ok) {
-			sola.error(writeResult.error)
-			return Err(new Error(`writing the file "${filename}"`))
+			sola.error(writeResult.value)
+			return r.err(new Error(`writing the file "${filename}"`))
 		}
 
-		return Ok(content)
+		return r.ok(content)
 	}
 
 	async readFile(): Promise<Result<StorageContent, Error>> {
 		const { commands: filename } = this.config.files
-		const stats = await to(fs.stat(filename))
+		const stats = await r.to(fs.stat(filename))
 
-		if (!stats.ok || !stats.data.isFile()) {
+		if (!stats.ok || !stats.value.isFile()) {
 			return this.writeFile(defaultContent)
 		}
 
-		const readResult = await to(fs.readFile(filename, 'utf8'))
+		const readResult = await r.to(fs.readFile(filename, 'utf8'))
 
 		if (!readResult.ok) {
-			sola.error(readResult.error)
-			return Err(new Error(`reading the files "${filename}"`))
+			sola.error(readResult.value)
+			return r.err(new Error(`reading the files "${filename}"`))
 		}
 
-		const parseResult = storageContentSchema.safeParse(JSON.parse(readResult.data))
+		const parseResult = storageContentSchema.safeParse(JSON.parse(readResult.value))
 
 		if (!parseResult.success) {
 			sola.error(parseResult.error)
-			return Err(new Error(`parsing the content of ${filename}`))
+			return r.err(new Error(`parsing the content of ${filename}`))
 		}
 
-		return Ok(parseResult.data)
+		return r.ok(parseResult.data)
 	}
 }

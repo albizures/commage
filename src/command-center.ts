@@ -1,9 +1,9 @@
 import Handlebars from 'handlebars'
 import { dency } from '@vyke/dency'
-import { Ok, type Result } from 'ts-results'
+import { type Result, r } from '@vyke/results'
 import { execa } from 'execa'
 import type { Command } from './command'
-import { StorageManager } from './storage'
+import { type StorageContent, StorageManager } from './storage'
 import { rootSola } from './sola'
 
 const sola = rootSola.withTag('command-center')
@@ -20,31 +20,20 @@ export class CommageCommandCenter implements CommandCenter {
 	constructor(private storage: StorageManager) { }
 
 	async getAll() {
-		const content = await this.storage.readFile()
-
-		return content.andThen(({ commands }) => Ok(commands))
+		return this.storage.readFile()
+			.then(r.next(getCommands))
 	}
 
 	async upsert(command: Command) {
 		const content = await this.storage.readFile()
+			.then(r.next(addCommand(command)))
+			.then(r.next((result) => this.storage.writeFile(result)))
 
-		const updateResult = content.andThen((value) => {
-			value.commands[command.name] = command
-
-			return Ok(value)
-		})
-
-		if (!updateResult.ok) {
-			return updateResult
+		if (!content.ok) {
+			return content
 		}
 
-		const writeResult = await this.storage.writeFile(updateResult.val)
-
-		if (!writeResult.ok) {
-			return writeResult
-		}
-
-		return Ok(command)
+		return r.ok(command)
 	}
 
 	async run(command: Command, parameters: NonNullable<unknown>) {
@@ -57,3 +46,17 @@ export class CommageCommandCenter implements CommandCenter {
 		sola.log(stdout)
 	}
 }
+
+// #region helpers
+function addCommand(command: Command) {
+	return (value: StorageContent) => {
+		value.commands[command.name] = command
+
+		return r.ok(value)
+	}
+}
+
+function getCommands(value: StorageContent) {
+	return r.ok(value.commands)
+}
+// #endregion

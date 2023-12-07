@@ -6,7 +6,7 @@ import pkg from '../package.json'
 import { JSONStorageManager, StorageManager } from './storage'
 import { CommageConfig, Config } from './config'
 import { App, CommageApp } from './app'
-import { CommageCommandCenter, CommandCenter } from './commandCenter'
+import { CommageCommandCenter, CommandCenter } from './command-center'
 
 dency.bindClass(Config, CommageConfig, CommageConfig.deps)
 dency.bindClass(StorageManager, JSONStorageManager, JSONStorageManager.deps)

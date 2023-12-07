@@ -14,10 +14,6 @@ export default antfu(
 			'ts/consistent-type-definitions': ['error', 'type'],
 			'ts/indent': 'off',
 			'ts/no-redeclare': 'off',
-			'arrow-parens': ['error', 'always'],
-			'curly': ['error', 'all'],
-			'indent': 'off',
-			'antfu/consistent-list-newline': 'off',
 			'ts/consistent-type-imports': [
 				'error',
 				{
@@ -25,6 +21,12 @@ export default antfu(
 					fixStyle: 'inline-type-imports',
 				},
 			],
+			'arrow-parens': ['error', 'always'],
+			'curly': ['error', 'all'],
+			'indent': 'off',
+			'antfu/consistent-list-newline': 'off',
+			'style/arrow-parens': ['error', 'always'],
+			'unicorn/filename-case': ['error', { case: 'kebabCase' }],
 		},
 	},
 )
